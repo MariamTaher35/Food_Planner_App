@@ -1,0 +1,23 @@
+{
+  "meals": [
+    {
+      "idMeal": "52772",
+      "strMeal": "Teriyaki Chicken Rice",
+      "strCategory": "Chicken",
+      "strArea": "Japanese",
+      "strInstructions": "...",
+      "strMealThumb": "https://www.themealdb.com/images/media/meals/wvpsxx1468231825.jpg",
+      "strYoutube": "https://www.youtube.com/watch?v=4aBR9RjthvQ",
+      "strIngredient1": "Soy Sauce",
+      "strIngredient2": "Honey",
+      "strIngredient3": "Ginger",
+      "strIngredient4": "Chicken Breasts",
+      "strIngredient5": "Rice",
+      "strMeasure1": "1/2 cup",
+      "strMeasure2": "1/4 cup",
+      "strMeasure3": "1 inch",
+      "strMeasure4": "2",
+      "strMeasure5": "1 cup"
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "categories": [
+    {
+      "idCategory": "1",
+      "strCategory": "Beef",
+      "strCategoryThumb": "https://www.themealdb.com/images/category/beef.jpg",
+      "strCategoryDescription": "Beef is the culinary name for meat from cattle, particularly skeletal muscle."
+    }
+  ]
+}

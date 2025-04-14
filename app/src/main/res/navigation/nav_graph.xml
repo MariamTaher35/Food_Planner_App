@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/mealOfDayFragment">
+
+    <fragment
+        android:id="@+id/mealOfDayFragment"
+        android:name="com.example.foodplannerapplication.fragments.MealOfDayFragment"
+        android:label="Meal of the Day"
+        tools:layout="@layout/fragment_meal_of_day" />
+
+    <fragment
+        android:id="@+id/categoriesFragment"
+        android:name="com.example.foodplannerapplication.fragments.CategoriesFragment"
+        android:label="Categories"
+        tools:layout="@layout/fragment_categories">
+        <action
+            android:id="@+id/action_categoriesFragment_to_mealListFragment"
+            app:destination="@id/mealListFragment" />
+        <action
+            android:id="@+id/action_categoriesFragment_to_mealDetailsFragment"
+            app:destination="@id/mealDetailsFragment">
+            <argument
+                android:name="mealId"
+                app:argType="string" />
+        </action>
+    </fragment>
+
+    <fragment
+        android:id="@+id/countriesFragment"
+        android:name="com.example.foodplannerapplication.fragments.CountriesFragment"
+        android:label="Countries"
+        tools:layout="@layout/fragment_countries">
+        <action
+            android:id="@+id/action_countriesFragment_to_mealListFragment"
+            app:destination="@id/mealListFragment" />
+        <action
+            android:id="@+id/action_countriesFragment_to_mealDetailsFragment"
+            app:destination="@id/mealDetailsFragment">
+            <argument
+                android:name="mealId"
+                app:argType="string" />
+        </action>
+    </fragment>
+
+    <fragment
+        android:id="@+id/mealListFragment"
+        android:name="com.example.foodplannerapplication.fragments.MealListFragment"
+        android:label="Meals"
+        tools:layout="@layout/fragment_meal_list">
+        <argument
+            android:name="category"
+            app:argType="string" />
+        <argument
+            android:name="area"
+            app:argType="string" />
+        <action
+            android:id="@+id/action_mealListFragment_to_mealDetailsFragment"
+            app:destination="@id/mealDetailsFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/mealDetailsFragment"
+        android:name="com.example.foodplannerapplication.fragments.MealDetailsFragment"
+        android:label="Meal Details"
+        tools:layout="@layout/fragment_meal_details">
+        <argument
+            android:name="mealId"
+            app:argType="string"
+            app:nullable="true" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/planFragment"
+        android:name="com.example.foodplannerapplication.fragments.PlanFragment"
+        android:label="Plan"
+        tools:layout="@layout/fragment_plan" />
+
+    <fragment
+        android:id="@+id/searchFragment"
+        android:name="com.example.foodplannerapplication.fragments.SearchFragment"
+        android:label="Search"
+        tools:layout="@layout/fragment_search">
+        <action
+            android:id="@+id/action_searchFragment_to_mealDetailsFragment"
+            app:destination="@id/mealDetailsFragment">
+            <argument
+                android:name="mealId"
+                app:argType="string" />
+        </action>
+    </fragment>
+
+    <fragment
+        android:id="@+id/favoritesFragment"
+        android:name="com.example.foodplannerapplication.fragments.FavoritesFragment"
+        android:label="Favorites"
+        tools:layout="@layout/fragment_favorites">
+        <action
+            android:id="@+id/action_favoritesFragment_to_mealDetailsFragment"
+            app:destination="@id/mealDetailsFragment">
+            <argument
+                android:name="mealId"
+                app:argType="string" />
+        </action>
+    </fragment>
+
+</navigation>
