@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/backgrondbottom_color"
+    android:background="@color/background_color"
     android:fillViewport="true"
     android:padding="24dp"
     tools:context=".Activities.SignupActivity">
