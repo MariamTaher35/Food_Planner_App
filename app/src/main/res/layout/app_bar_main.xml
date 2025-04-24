@@ -4,20 +4,21 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".Activities.MainActivity">
+    tools:context=".Activities.MainActivity"
+    android:background="#F9F9F7"> <!-- Optional: light background to complement the green -->
 
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:theme="@style/Theme.FoodPlannerApplication.AppBarOverlay">
+        android:theme="@style/Theme.FoodPlannerApplication.AppBarOverlay"
+        tools:ignore="ExtraText">
 
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:background="?attr/colorPrimary"
-            app:popupTheme="@style/Theme.FoodPlannerApplication.PopupOverlay" />
-
+            android:background="#5E705B"
+        app:popupTheme="@style/Theme.FoodPlannerApplication.PopupOverlay" />
     </com.google.android.material.appbar.AppBarLayout>
 
     <include
@@ -33,7 +34,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_margin="@dimen/fab_margin"
-        app:srcCompat="@android:drawable/ic_dialog_email"
-        android:contentDescription="@string/send_email"/>
-
+        app:backgroundTint="#5E705B"
+    app:srcCompat="@android:drawable/ic_dialog_email"
+    android:contentDescription="@string/send_email" />
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

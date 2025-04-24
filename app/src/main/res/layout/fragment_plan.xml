@@ -7,8 +7,9 @@
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginBottom="?attr/actionBarSize"
-        android:fillViewport="true">
+        android:background="@drawable/background"
+        android:fillViewport="true"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -20,8 +21,9 @@
                 android:id="@+id/plannedMealsRecyclerView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:background="@drawable/background"
                 android:nestedScrollingEnabled="false"
-                android:paddingBottom="72dp" />
+                android:paddingBottom="?attr/actionBarSize" />
 
             <TextView
                 android:id="@+id/guest_mode_message"

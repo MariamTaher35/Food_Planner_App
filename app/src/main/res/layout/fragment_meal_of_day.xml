@@ -1,122 +1,171 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:background="#FAFAFA"> <!-- soft background -->
 
     <androidx.core.widget.NestedScrollView
-        android:id="@+id/nestedScrollView"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        android:fillViewport="true"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
-        android:paddingBottom="?attr/actionBarSize">
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="16dp">
+            android:padding="20dp"
+            android:clipToPadding="false"
+            android:gravity="center_horizontal">
 
-            <ImageView
-                android:id="@+id/mealImageView"
+            <!-- Meal Image Card -->
+            <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
-                android:layout_height="200dp"
-                android:scaleType="centerCrop"
-                tools:src="@tools:sample/avatars"
-                android:contentDescription="@string/meal_image_description" />
+                android:layout_height="wrap_content"
+                app:cardElevation="8dp"
+                app:cardCornerRadius="24dp"
+                app:cardBackgroundColor="@android:color/white">
 
+                <ImageView
+                    android:id="@+id/mealImageView"
+                    android:layout_width="match_parent"
+                    android:layout_height="220dp"
+                    android:scaleType="centerCrop"
+                    android:contentDescription="@string/meal_image_description" />
+            </androidx.cardview.widget.CardView>
+
+            <!-- Meal Name -->
             <TextView
                 android:id="@+id/mealNameTextView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:textSize="24sp"
+                android:textSize="26sp"
+                android:textColor="#222222"
                 android:textStyle="bold"
-                tools:text="Meal Name" />
-
-            <TextView
-                android:id="@+id/mealCategoryTextView"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                tools:text="Category: Dessert" />
-
-            <TextView
-                android:id="@+id/mealAreaTextView"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                tools:text="Area: British" />
-
-            <TextView
-                android:id="@+id/ingredientsTextView"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
+                android:letterSpacing="0.02"
+                tools:text="Creamy Chicken Alfredo" />
+
+            <!-- Chips for category & area -->
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="8dp"
+                android:gravity="center">
+
+                <TextView
+                    android:id="@+id/mealCategoryTextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/chip_background"
+                    android:padding="8dp"
+                    android:textColor="#666666"
+                    android:textSize="14sp"
+                    tools:text="Dessert" />
+
+                <View
+                    android:layout_width="8dp"
+                    android:layout_height="0dp" />
+
+                <TextView
+                    android:id="@+id/mealAreaTextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/chip_background"
+                    android:padding="8dp"
+                    android:textColor="#666666"
+                    android:textSize="14sp"
+                    tools:text="British" />
+            </LinearLayout>
+
+            <!-- Ingredients -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:text="@string/ingredients"
-                android:textSize="18sp"
-                android:textStyle="bold" />
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:layout_marginTop="24dp"
+                android:textColor="#333333" />
 
             <LinearLayout
                 android:id="@+id/ingredientsLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
                 android:orientation="vertical" />
 
+            <!-- Instructions -->
             <TextView
-                android:id="@+id/mealInstructionsTextView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
                 android:text="@string/instructions"
-                android:textSize="18sp"
-                android:textStyle="bold" />
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:layout_marginTop="24dp"
+                android:textColor="#333333" />
 
             <TextView
                 android:id="@+id/instructionsDetailTextView"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                tools:text="Instructions go here..." />
+                android:textColor="#444444"
+                android:textSize="16sp"
+                android:lineSpacingExtra="4dp"
+                tools:text="Detailed recipe instructions here..." />
 
+            <!-- YouTube Player -->
             <com.pierfrancescosoffritti.androidyoutubeplayer.core.player.views.YouTubePlayerView
                 android:id="@+id/youtubePlayerView"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                app:autoPlay="false"
-                android:background="#FF0000"
-                android:visibility="gone" />
+                android:layout_height="200dp"
+                android:layout_marginTop="24dp"
+                android:visibility="gone"
+                android:background="@drawable/rounded_youtube_placeholder" />
 
-            <Button
-                android:id="@+id/addToFavoritesButton"
-                android:layout_width="wrap_content"
+            <!-- Buttons -->
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:text="@string/add_to_favorites" />
+                android:orientation="horizontal"
+                android:gravity="center"
+                android:layout_marginTop="32dp">
 
-            <Button
-                android:id="@+id/addToPlannedMealsButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:text="@string/add_to_planned_meals" />
+                <Button
+                    android:id="@+id/addToFavoritesButton"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/add_to_favorites"
+                    android:backgroundTint="#FF7043"
+                    android:textColor="#FFFFFF"
+                    android:layout_marginEnd="8dp"
+                    android:background="@drawable/rounded_button" />
+
+                <Button
+                    android:id="@+id/addToPlannedMealsButton"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/add_to_planned_meals"
+                    android:backgroundTint="#66BB6A"
+                    android:textColor="#FFFFFF"
+                    android:background="@drawable/rounded_button" />
+            </LinearLayout>
 
             <ProgressBar
                 android:id="@+id/progressBar"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:visibility="gone"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent" />
-
+                android:layout_marginTop="32dp"
+                android:visibility="gone" />
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
-
 </androidx.constraintlayout.widget.ConstraintLayout>
+

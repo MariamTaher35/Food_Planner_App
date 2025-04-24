@@ -63,7 +63,7 @@ class FavoritesFragment : Fragment() {
             lifecycleScope.launch {
                 appDatabase.favoriteMealDao().getAll(currentUserId).collectLatest { favoriteMeals -> // Use userId
                     withContext(Dispatchers.Main) {
-                        adapter = FavoritesAdapter(favoriteMeals, { meal ->
+                        adapter = FavoritesAdapter(favoriteMeals, { meal ->  // Pass the meal object
                             navigateToMealDetails(meal.id)
                         }, { meal ->
                             deleteFavoriteMeal(meal)

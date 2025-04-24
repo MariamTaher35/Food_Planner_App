@@ -1,7 +1,9 @@
 package com.example.foodplannerapplication.Adapters
 
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -12,6 +14,8 @@ import com.example.foodplannerapplication.databinding.ItemPlannedMealBinding
 class PlannedMealsAdapter(
     private val onDeleteClick: (PlannedMeal) -> Unit
 ) : ListAdapter<PlannedMeal, PlannedMealsAdapter.PlannedMealViewHolder>(PlannedMealDiffCallback()) {
+
+    var onMealClick: ((PlannedMeal) -> Unit)? = null
 
     inner class PlannedMealViewHolder(val binding: ItemPlannedMealBinding) :
         RecyclerView.ViewHolder(binding.root) {
@@ -36,19 +40,22 @@ class PlannedMealsAdapter(
     override fun onBindViewHolder(holder: PlannedMealViewHolder, position: Int) {
         val currentItem = getItem(position)
         holder.bind(currentItem)
+        holder.itemView.setOnClickListener {
+            onMealClick?.invoke(currentItem)
+        }
     }
 
-    fun updateMeals(newMeals: List<PlannedMeal>) {
-        submitList(newMeals)
-    }
-}
-
-class PlannedMealDiffCallback : DiffUtil.ItemCallback<PlannedMeal>() {
-    override fun areItemsTheSame(oldItem: PlannedMeal, newItem: PlannedMeal): Boolean {
-        return oldItem.id == newItem.id
+    override fun onCurrentListChanged(previousList: MutableList<PlannedMeal>, currentList: MutableList<PlannedMeal>) {
+        super.onCurrentListChanged(previousList, currentList)
     }
 
-    override fun areContentsTheSame(oldItem: PlannedMeal, newItem: PlannedMeal): Boolean {
-        return oldItem == newItem
+    class PlannedMealDiffCallback : DiffUtil.ItemCallback<PlannedMeal>() {
+        override fun areItemsTheSame(oldItem: PlannedMeal, newItem: PlannedMeal): Boolean {
+            return oldItem.id == newItem.id
+        }
+
+        override fun areContentsTheSame(oldItem: PlannedMeal, newItem: PlannedMeal): Boolean {
+            return oldItem == newItem
+        }
     }
 }

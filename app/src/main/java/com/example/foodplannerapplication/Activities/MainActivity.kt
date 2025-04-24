@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
-import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
@@ -13,7 +12,6 @@ import androidx.appcompat.widget.Toolbar
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.navigation.NavController
-import androidx.navigation.findNavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
@@ -65,17 +63,17 @@ class MainActivity : AppCompatActivity() {
         val navViewDrawer = binding.navViewDrawer
         val navViewBottom = binding.navViewBottom
 
-        val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_host_fragment_activity_main) as NavHostFragment
+        val navHostFragment =
+            supportFragmentManager.findFragmentById(R.id.nav_host_fragment_activity_main) as NavHostFragment
         navController = navHostFragment.navController
 
         appBarConfiguration = AppBarConfiguration(
             setOf(
-                R.id.mealOfDayFragment,
+                R.id.homeFragment,
                 R.id.searchFragment,
-                R.id.categoriesFragment,
-                R.id.countriesFragment,
                 R.id.planFragment,
-                R.id.favoritesFragment // Add favoritesFragment as a top-level destination if you want the hamburger icon on it
+                R.id.favoritesFragment,
+                R.id.countriesFragment  // Add CountriesFragment to the top-level destinations
             ),
             drawerLayout
         )
@@ -90,12 +88,22 @@ class MainActivity : AppCompatActivity() {
                     logout()
                     true
                 }
+                R.id.nav_home -> {
+                    navController.navigate(R.id.homeFragment)
+                    drawerLayout.closeDrawer(GravityCompat.START)
+                    return@setNavigationItemSelectedListener true
+                }
+                R.id.nav_countries -> {  // Handle Countries navigation
+                    navController.navigate(R.id.countriesFragment)
+                    drawerLayout.closeDrawer(GravityCompat.START)
+                    return@setNavigationItemSelectedListener true
+                }
                 else -> {
                     val handled = menuItem.onNavDestinationSelected(navController)
                     if (handled) {
                         drawerLayout.closeDrawer(GravityCompat.START)
                     }
-                    handled
+                    return@setNavigationItemSelectedListener handled
                 }
             }
         }
@@ -117,31 +125,10 @@ class MainActivity : AppCompatActivity() {
         googleSignInClient = GoogleSignIn.getClient(this, gso)
     }
 
-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        menuInflater.inflate(R.menu.menu_main, menu)
-        Log.d("MainActivity", "Is Guest Mode in onCreateOptionsMenu: ${authManager.isGuestMode()}")
-        if (authManager.isGuestMode()) {
-            val settingsItem = menu?.findItem(R.id.action_settings)
-            settingsItem?.setTitle(R.string.login)
-        }
-        return true
-    }
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+    override fun onOptionsItemSelected(item: MenuItem): Boolean { // Changed parameter type
         Log.d("MainActivity", "onOptionsItemSelected: ${item.itemId}")
         return when (item.itemId) {
-            R.id.action_settings -> {
-                Log.d("MainActivity", "Settings/Login item clicked. Is Guest Mode: ${authManager.isGuestMode()}")
-                if (authManager.isGuestMode()) {
-                    Log.d("MainActivity", "Starting LoginActivity")
-                    startActivity(Intent(this, LoginActivity::class.java))
-                    return true
-                } else {
-                    // Handle settings action
-                    Log.d("MainActivity", "Handling Settings action for logged-in user")
-                    false
-                }
-            }
             else -> item.onNavDestinationSelected(navController) || super.onOptionsItemSelected(item)
         }
     }

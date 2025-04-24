@@ -1,145 +1,86 @@
 package com.example.foodplannerapplication.fragments
 
-
-
 import android.os.Bundle
-
 import android.util.Log
-
 import android.view.LayoutInflater
-
 import android.view.View
-
 import android.view.ViewGroup
-
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
-
 import androidx.recyclerview.widget.LinearLayoutManager
-
+import androidx.recyclerview.widget.RecyclerView
 import com.example.foodplannerapplication.Adapters.AreaAdapter
-
 import com.example.foodplannerapplication.Models.Area
-
 import com.example.foodplannerapplication.Models.AreaResponse
-
 import com.example.foodplannerapplication.Models.TheMealDBService
 import com.example.foodplannerapplication.R
-
-import com.example.foodplannerapplication.databinding.FragmentCountriesBinding
-
 import retrofit2.Call
-
 import retrofit2.Callback
-
 import retrofit2.Response
-
-
 
 class CountriesFragment : Fragment() {
 
-
-
-    private var _binding: FragmentCountriesBinding? = null
-
-    private val binding get() = _binding!!
-
     private val apiService = TheMealDBService.create()
-
-
+    private var countriesList: List<Area> = emptyList()
+    private lateinit var countriesRecyclerView: RecyclerView
+    private lateinit var areaAdapter: AreaAdapter
 
     override fun onCreateView(
-
         inflater: LayoutInflater, container: ViewGroup?,
-
         savedInstanceState: Bundle?
-
     ): View? {
-
-        _binding = FragmentCountriesBinding.inflate(inflater, container, false)
-
-        return binding.root
-
+        return inflater.inflate(R.layout.fragment_countries, container, false)
     }
-
-
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-
         super.onViewCreated(view, savedInstanceState)
-
+        countriesRecyclerView = view.findViewById(R.id.countriesRecyclerView)
+        setupRecyclerView()
         fetchCountries()
-
     }
 
-
-
-    private fun fetchCountries() {
-
-        val call = apiService.getAreas()
-
-        call.enqueue(object : Callback<AreaResponse> {
-
-            override fun onResponse(
-
-                call: Call<AreaResponse>,
-
-                response: Response<AreaResponse>
-
+    private fun setupRecyclerView() {
+        countriesRecyclerView.addItemDecoration(object : RecyclerView.ItemDecoration() {
+            override fun getItemOffsets(
+                outRect: android.graphics.Rect,
+                view: View,
+                parent: RecyclerView,
+                state: RecyclerView.State
             ) {
-
-                if (response.isSuccessful) {
-
-                    val areas = response.body()?.meals ?: emptyList()
-
-                    setupRecyclerView(areas)
-
-                } else {
-
-                    Log.e("CountriesFragment", "API request failed: ${response.message()}")
-
-                }
-
+                outRect.top = 4 // 4dp top space between items
             }
-
-
-
-            override fun onFailure(call: Call<AreaResponse>, t: Throwable) {
-
-                Log.e("CountriesFragment", "API request failed: ${t.message}")
-
-            }
-
         })
 
-    }
-
-
-    private fun setupRecyclerView(areas: List<Area>) {
-        binding.countriesRecyclerView.apply {
-            layoutManager = LinearLayoutManager(context)
-            adapter = AreaAdapter(areas) { area ->
-                // Navigate to MealListFragment with the area name
-                val bundle = Bundle().apply {
-                    putString("area", area.strArea)
-                }
-                findNavController().navigate(
-                    R.id.action_countriesFragment_to_mealListFragment,
-                    bundle
-                )
-                Log.d("CountriesFragment", "Area clicked: ${area.strArea}")
+        countriesRecyclerView.layoutManager = LinearLayoutManager(context)
+        areaAdapter = AreaAdapter(emptyList()) { country ->
+            val bundle = Bundle().apply {
+                putString("area", country.strArea)
             }
+            findNavController().navigate(
+                R.id.action_countriesFragment_to_mealListFragment,
+                bundle
+            )
         }
+        countriesRecyclerView.adapter = areaAdapter
     }
 
+    private fun fetchCountries() {
+        apiService.getAreas().enqueue(object : Callback<AreaResponse> {
+            override fun onResponse(call: Call<AreaResponse>, response: Response<AreaResponse>) {
+                if (response.isSuccessful) {
+                    val areaResponse = response.body()
+                    areaResponse?.meals?.let {
+                        countriesList = it
+                        areaAdapter.updateData(countriesList)
+                    }
+                } else {
+                    Log.e("CountriesFragment", "Failed to fetch countries: ${response.message()}")
+                }
+            }
 
-
-    override fun onDestroyView() {
-
-        super.onDestroyView()
-
-        _binding = null
-
+            override fun onFailure(call: Call<AreaResponse>, t: Throwable) {
+                Log.e("CountriesFragment", "Error fetching countries: ${t.message}")
+            }
+        })
     }
-
 }

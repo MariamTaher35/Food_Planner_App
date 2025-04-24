@@ -57,6 +57,7 @@ dependencies {
     implementation("androidx.test.ext:junit-ktx:1.2.1")
     implementation("androidx.navigation:navigation-fragment-ktx:2.7.5")
     implementation("androidx.navigation:navigation-ui-ktx:2.7.5")
+    implementation("org.chromium.net:cronet-embedded:119.6045.31")
     kapt("androidx.room:room-compiler:2.6.1")
     implementation("androidx.room:room-ktx:2.6.1") // For Kotlin extensions
 
@@ -108,6 +109,11 @@ dependencies {
 
     implementation("androidx.navigation:navigation-fragment-ktx:2.7.5")
     implementation("androidx.navigation:navigation-ui-ktx:2.7.5")
+
+    implementation ("de.hdodenhof:circleimageview:3.1.0")
+    implementation ("com.pierfrancescosoffritti.androidyoutubeplayer:core:12.1.0' // Or the latest version")
+
+    implementation ("com.google.android.material:material:1.10.0")
 
 }
 

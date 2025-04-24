@@ -10,9 +10,10 @@ import com.bumptech.glide.Glide
 import com.example.foodplannerapplication.Models.Meal
 import com.example.foodplannerapplication.R
 import com.example.foodplannerapplication.databinding.ItemMealBinding
+import android.graphics.Color // Import Color
 
 class MealAdapter(
-    private val meals: List<Meal>,
+    var meals: List<Meal>,
     private val fromSearch: Boolean = false, // Add this parameter
     private val onItemClick: (Meal) -> Unit
 ) : RecyclerView.Adapter<MealAdapter.MealViewHolder>() {
@@ -32,6 +33,7 @@ class MealAdapter(
     override fun onBindViewHolder(holder: MealViewHolder, position: Int) {
         val meal = meals[position]
         holder.binding.mealNameTextView.text = meal.strMeal
+        holder.binding.mealNameTextView.setTextColor(Color.parseColor("#5e705b")) // Set the text color here
         Glide.with(holder.itemView.context)
             .load(meal.strMealThumb)
             .into(holder.binding.mealImageView)
@@ -61,4 +63,9 @@ class MealAdapter(
     }
 
     override fun getItemCount(): Int = meals.size
+
+    fun updateData(newMeals: List<Meal>) {
+        meals = newMeals; //re-assign
+        notifyDataSetChanged()
+    }
 }

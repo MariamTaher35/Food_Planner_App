@@ -2,9 +2,8 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
-        android:id="@+id/mealOfDayFragment"
-        android:icon="@drawable/_377055_bowl_food_noodle_ramen_icon"
-        android:title="Meal" />
+        android:id="@+id/homeFragment"
+        android:icon="@drawable/ic_home" android:title="Home" />
 
     <item
         android:id="@+id/searchFragment"
@@ -12,18 +11,11 @@
         android:title="Search" />
 
     <item
-        android:id="@+id/categoriesFragment"
-        android:icon="@drawable/category_icon"
-        android:title="Categories" />
-
-    <item
-        android:id="@+id/countriesFragment"
-        android:icon="@drawable/countries_icon"
-        android:title="Countries" />
+        android:id="@+id/favoritesFragment"
+        android:icon="@drawable/ic_favorite" android:title="Favorite" />
 
     <item
         android:id="@+id/planFragment"
         android:icon="@drawable/plan_icon"
         android:title="Plan" />
-
 </menu>

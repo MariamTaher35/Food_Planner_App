@@ -2,7 +2,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:background="#F9F9F7">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -16,6 +17,7 @@
             android:layout_marginBottom="16dp"
             android:gravity="center"
             android:text="Add Meal to Plan"
+            android:textColor="#5E705B"
             android:textSize="22sp"
             android:textStyle="bold"
             app:layout_constraintEnd_toEndOf="parent"
@@ -28,6 +30,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             android:gravity="center"
+            android:textColor="#5E705B"
             android:textSize="18sp"
             android:textStyle="bold"
             app:layout_constraintEnd_toEndOf="parent"
@@ -40,17 +43,20 @@
             android:layout_width="0dp"
             android:layout_height="200dp"
             android:layout_marginTop="16dp"
+            android:layout_marginBottom="16dp"
             android:scaleType="centerCrop"
+            tools:src="@drawable/ic_placeholder_image"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/mealNameTextView"
-            android:layout_marginBottom="16dp"  tools:src="@drawable/ic_placeholder_image" />
+            app:layout_constraintTop_toBottomOf="@+id/mealNameTextView" />
+
         <TextView
             android:id="@+id/dayOfWeekLabel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             android:text="Day of Week:"
+            android:textColor="#5E705B"
             android:textSize="16sp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/mealImageView" />
@@ -70,6 +76,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             android:text="Meal Time:"
+            android:textColor="#5E705B"
             android:textSize="16sp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/dayOfWeekSpinner" />
@@ -80,6 +87,8 @@
             android:layout_height="48dp"
             android:layout_marginTop="8dp"
             android:hint="e.g., 12:00 PM"
+            android:textColor="#5E705B"
+            android:backgroundTint="#5E705B"
             android:inputType="text"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -91,6 +100,9 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="24dp"
             android:text="Add to Plan"
+            android:textColor="@android:color/white"
+            app:backgroundTint="#5E705B"
+            app:cornerRadius="12dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/mealTimeEditText" />

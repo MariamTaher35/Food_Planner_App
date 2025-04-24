@@ -3,45 +3,27 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph"
-    app:startDestination="@id/mealOfDayFragment">
+    app:startDestination="@id/homeFragment">
 
     <fragment
-        android:id="@+id/mealOfDayFragment"
-        android:name="com.example.foodplannerapplication.fragments.MealOfDayFragment"
-        android:label="Meal of the Day"
-        tools:layout="@layout/fragment_meal_of_day" />
-
-    <fragment
-        android:id="@+id/categoriesFragment"
-        android:name="com.example.foodplannerapplication.fragments.CategoriesFragment"
-        android:label="Categories"
-        tools:layout="@layout/fragment_categories">
+        android:id="@+id/homeFragment"
+        android:name="com.example.foodplannerapplication.fragments.HomeFragment"
+        android:label="Home"
+        tools:layout="@layout/fragment_home">
         <action
-            android:id="@+id/action_categoriesFragment_to_mealListFragment"
-            app:destination="@id/mealListFragment" />
-        <action
-            android:id="@+id/action_categoriesFragment_to_mealDetailsFragment"
+            android:id="@+id/action_homeFragment_to_mealDetailsFragment"
             app:destination="@id/mealDetailsFragment">
             <argument
                 android:name="mealId"
                 app:argType="string" />
         </action>
-    </fragment>
-
-    <fragment
-        android:id="@+id/countriesFragment"
-        android:name="com.example.foodplannerapplication.fragments.CountriesFragment"
-        android:label="Countries"
-        tools:layout="@layout/fragment_countries">
         <action
-            android:id="@+id/action_countriesFragment_to_mealListFragment"
-            app:destination="@id/mealListFragment" />
-        <action
-            android:id="@+id/action_countriesFragment_to_mealDetailsFragment"
-            app:destination="@id/mealDetailsFragment">
+            android:id="@+id/action_homeFragment_to_mealListFragment"
+            app:destination="@id/mealListFragment">
             <argument
-                android:name="mealId"
-                app:argType="string" />
+                android:name="category"
+                app:argType="string"
+                app:nullable="true" />
         </action>
     </fragment>
 
@@ -52,10 +34,12 @@
         tools:layout="@layout/fragment_meal_list">
         <argument
             android:name="category"
-            app:argType="string" />
+            app:argType="string"
+            app:nullable="true" />
         <argument
             android:name="area"
-            app:argType="string" />
+            app:argType="string"
+            app:nullable="true" />
         <action
             android:id="@+id/action_mealListFragment_to_mealDetailsFragment"
             app:destination="@id/mealDetailsFragment" />
@@ -103,6 +87,20 @@
             <argument
                 android:name="mealId"
                 app:argType="string" />
+        </action>
+    </fragment>
+
+    <fragment
+        android:id="@+id/countriesFragment"
+        android:name="com.example.foodplannerapplication.fragments.CountriesFragment"
+        android:label="Countries"
+        tools:layout="@layout/fragment_countries">
+        <action
+            android:id="@+id/action_countriesFragment_to_mealListFragment"  app:destination="@id/mealListFragment">
+            <argument
+                android:name="area"
+                app:argType="string"
+                app:nullable="true" />
         </action>
     </fragment>
 

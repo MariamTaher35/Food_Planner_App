@@ -97,23 +97,32 @@ class LoginActivity : AppCompatActivity() {
         googleSignInLauncher.launch(signInIntent)
     }
 
-    private val googleSignInLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        if (result.resultCode == Activity.RESULT_OK) {
-            val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
-            try {
-                val account = task.getResult(ApiException::class.java)
-                if (account?.idToken != null) {
-                    firebaseAuthWithGoogle(account.idToken!!)
-                } else {
-                    Timber.w("Google sign in failed: ID token null.")
-                    Toast.makeText(this, getString(R.string.google_sign_in_failed_id_token), Toast.LENGTH_SHORT).show()
+    private val googleSignInLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
+                try {
+                    val account = task.getResult(ApiException::class.java)
+                    if (account?.idToken != null) {
+                        firebaseAuthWithGoogle(account.idToken!!)
+                    } else {
+                        Timber.e("Google sign-in failed: ID token is null")
+                        Toast.makeText(this, "Google sign-in failed: ID token is null", Toast.LENGTH_SHORT).show()
+                    }
+                } catch (e: ApiException) {
+                    Timber.e(e, "Google sign-in failed with status code: ${e.statusCode}")
+                    Toast.makeText(
+                        this,
+                        "Google sign-in failed. Code: ${e.statusCode} (${e.message})",
+                        Toast.LENGTH_LONG
+                    ).show()
                 }
-            } catch (e: ApiException) {
-                Timber.w("Google sign in failed: ${e.message}")
-                Toast.makeText(this, getString(R.string.google_sign_in_failed, e.message), Toast.LENGTH_SHORT).show()
+            } else {
+                Timber.w("Google sign-in result not OK")
+                Toast.makeText(this, "Google sign-in canceled or failed.", Toast.LENGTH_SHORT).show()
             }
         }
-    }
+
 
     private fun firebaseAuthWithGoogle(idToken: String) {
         val credential = GoogleAuthProvider.getCredential(idToken, null)
@@ -130,6 +139,7 @@ class LoginActivity : AppCompatActivity() {
                 }
             }
     }
+
 
     private fun navigateToMainActivity(userId: String) {
         sessionManager.saveUserId(userId)

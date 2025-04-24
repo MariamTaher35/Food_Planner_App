@@ -15,6 +15,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.foodplannerapplication.Adapters.PlannedMealsAdapter
 import com.example.foodplannerapplication.Data.AppDatabase
@@ -115,6 +116,9 @@ class PlanFragment : Fragment() {
         plannedMealsAdapter = PlannedMealsAdapter { meal ->
             deletePlannedMeal(meal)
         }
+        plannedMealsAdapter.onMealClick = { meal ->  // Set the click listener here
+            navigateToMealDetails(meal.id) // Access mealId here
+        }
         binding.plannedMealsRecyclerView.layoutManager = LinearLayoutManager(requireContext())
         binding.plannedMealsRecyclerView.adapter = plannedMealsAdapter
     }
@@ -122,7 +126,7 @@ class PlanFragment : Fragment() {
     private fun observePlannedMeals() {
         userId?.let { currentUserId ->
             lifecycleScope.launch {
-                appDatabase.plannedMealDao().getAll(currentUserId).collectLatest { meals -> // Use userId
+                appDatabase.plannedMealDao().getAll(currentUserId).collectLatest { meals ->
                     withContext(Dispatchers.Main) {
                         plannedMealsAdapter.submitList(meals)
                         meals.forEach { meal ->
@@ -135,10 +139,17 @@ class PlanFragment : Fragment() {
         }
     }
 
+    private fun navigateToMealDetails(mealId: String) {
+        val bundle = Bundle().apply {
+            putString("mealId", mealId)
+        }
+        findNavController().navigate(R.id.mealDetailsFragment, bundle)
+    }
+
     private fun deletePlannedMeal(plannedMeal: PlannedMeal) {
         userId?.let { currentUserId ->
             lifecycleScope.launch(Dispatchers.IO) {
-                if (plannedMeal.userId == currentUserId) { // Ensure it belongs to the current user
+                if (plannedMeal.userId == currentUserId) {
                     appDatabase.plannedMealDao().delete(plannedMeal)
                     withContext(Dispatchers.Main) {
                         Toast.makeText(context, "Meal deleted from plan", Toast.LENGTH_SHORT).show()
@@ -168,7 +179,7 @@ class PlanFragment : Fragment() {
     private fun performSearchAndAddMeal(searchTerm: String) {
         lifecycleScope.launch {
             delay(1000)
-            val dummyMealId = "searchedMealId_${System.currentTimeMillis()}" // Generate unique ID
+            val dummyMealId = "searchedMealId_${System.currentTimeMillis()}"
             val dummyMealName = "Searched Meal: $searchTerm"
             val dummyMealImageUrl = "https://example.com/searched_meal.jpg"
             withContext(Dispatchers.Main) {
@@ -212,7 +223,7 @@ class PlanFragment : Fragment() {
 
     private fun addMealToPlan(mealId: String, dayOfWeek: String, mealTime: String, mealName: String, mealImageUrl: String) {
         userId?.let { currentUserId ->
-            val plannedMeal = PlannedMeal(mealId, dayOfWeek, mealTime, authManager.isGuestMode(), mealName, mealImageUrl, currentUserId) // Include userId
+            val plannedMeal = PlannedMeal(mealId, dayOfWeek, mealTime, authManager.isGuestMode(), mealName, mealImageUrl, currentUserId)
             Log.d("PlanFragment", "Creating PlannedMeal with userId: $currentUserId")
 
             lifecycleScope.launch(Dispatchers.IO) {

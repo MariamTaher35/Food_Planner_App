@@ -28,5 +28,12 @@
     <string name="instructions">Instructions:</string>
     <string name="add_to_favorites">Add to Favorites</string>
     <string name="add_to_planned_meals">Add to Planned Meals</string>
+    <string name="meal_image">Image of the meal</string>
+    <string name="search_icon">Search Icon</string>
+    <string name="country_image">Country Image</string>
+
+
+
+
 
 </resources>
