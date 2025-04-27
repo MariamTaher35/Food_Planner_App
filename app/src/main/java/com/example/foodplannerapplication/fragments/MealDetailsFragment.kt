@@ -10,37 +10,21 @@ import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.ViewModelProvider
 import com.bumptech.glide.Glide
-import com.example.foodplannerapplication.Data.AppDatabase
-import com.example.foodplannerapplication.Data.FavoriteMeal
 import com.example.foodplannerapplication.Models.Meal
-import com.example.foodplannerapplication.Models.MealsResponse
-import com.example.foodplannerapplication.Models.TheMealDBService
 import com.example.foodplannerapplication.R
-import com.example.foodplannerapplication.auth.AuthManager
-import com.example.foodplannerapplication.databinding.FragmentMealDetailsBinding // Corrected import
-import com.google.firebase.auth.FirebaseAuth
+import com.example.foodplannerapplication.ViewModels.MealDetailsViewModel  // Import the ViewModel
+import com.example.foodplannerapplication.databinding.FragmentMealDetailsBinding
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.YouTubePlayer
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.listeners.AbstractYouTubePlayerListener
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 
 class MealDetailsFragment : Fragment() {
 
     private var _binding: FragmentMealDetailsBinding? = null
     private val binding get() = _binding!!
-    private val apiService = TheMealDBService.create()
+    private lateinit var mealDetailsViewModel: MealDetailsViewModel  // Use the ViewModel
     private var mealId: String? = null
-    private lateinit var authManager: AuthManager
-    private lateinit var appDatabase: AppDatabase
-    private var meal: Meal? = null
-    private val userId: String?
-        get() = FirebaseAuth.getInstance().currentUser?.uid
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -55,71 +39,76 @@ class MealDetailsFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentMealDetailsBinding.inflate(inflater, container, false)
-        authManager = AuthManager(requireContext())
-        appDatabase = AppDatabase.getInstance(requireContext())
         return binding.root
     }
 
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        Log.d("MealDetailsFragment", "onViewCreated")
-        mealId?.let { fetchMealDetails(it) }
 
-        if (!authManager.isGuestMode()) {
-            setupFavoriteIcon() // Set up the heart icon
+        // Initialize ViewModel
+        mealDetailsViewModel = ViewModelProvider(this).get(MealDetailsViewModel::class.java)
+        mealDetailsViewModel.setMealId(mealId)
+
+        // Observe data from the ViewModel
+        observeMealDetails()
+        observeLoading()
+        observeError()
+        observeIsFavorite()
+
+        // Setup UI based on authentication state
+        if (!mealDetailsViewModel.authManager.isGuestMode()) {
+            setupFavoriteIcon()
             binding.addToPlannedMealsButton.setOnClickListener {
                 showPlanMealDialog()
             }
         } else {
-            binding.addToPlannedMealsButton.isEnabled = false
+            binding.addToPlannedMealsButton.isEnabled = false;
             binding.youtubePlayerView.visibility = View.GONE
         }
-    }
 
-    private fun setupFavoriteIcon() {
-        // Safely access the favoriteIconImageView from the binding
-        val favoriteIcon: ImageView? = binding.favoriteIconImageView
-        favoriteIcon?.setOnClickListener {
-            meal?.let {
-                addMealToFavorites(it)
-                // Optionally, change the icon to filled here
-                favoriteIcon.setImageResource(R.drawable.ic_heart_filled) // Ensure you have this drawable
-            }
-        } ?: run {
-            Log.e("MealDetailsFragment", "favoriteIconImageView is null")
-            //  Consider showing a message to the user
+        // Check if the fragment is opened from the plan
+        val isFromPlan = arguments?.getBoolean("isFromPlan", false) ?: false
+        if (isFromPlan) {
+            binding.addToPlannedMealsButton.visibility = View.GONE
         }
     }
 
-    private fun fetchMealDetails(mealId: String) {
-        binding.progressBar.visibility = View.VISIBLE
-        val call = apiService.getMealDetails(mealId)
-        call.enqueue(object : Callback<MealsResponse> {
-            override fun onResponse(
-                call: Call<MealsResponse>,
-                response: Response<MealsResponse>
-            ) {
-                binding.progressBar.visibility = View.GONE
-                if (response.isSuccessful) {
-                    meal = response.body()?.meals?.firstOrNull()
-                    Log.d("MealDetailsFragment", "Fetched meal: $meal")
-                    meal?.let { updateUI(it) } ?: run {
-                        Log.e("MealDetailsFragment", "No meal found in response")
-                        Toast.makeText(context, "No meal details found", Toast.LENGTH_SHORT).show()
-                    }
-                } else {
-                    Log.e("MealDetailsFragment", "API request failed: ${response.message()}")
-                    Toast.makeText(context, "Failed to fetch meal details", Toast.LENGTH_SHORT).show()
-                }
+    private fun observeMealDetails() {
+        mealDetailsViewModel.meal.observe(viewLifecycleOwner) { meal ->
+            meal?.let {
+                updateUI(it)
             }
+        }
+    }
 
-            override fun onFailure(call: Call<MealsResponse>, t: Throwable) {
-                binding.progressBar.visibility = View.GONE
-                Log.e("MealDetailsFragment", "API request failed: ${t.message}")
-                Toast.makeText(context, "Failed to fetch meal details: ${t.message}", Toast.LENGTH_SHORT).show()
+    private fun observeLoading() {
+        mealDetailsViewModel.loading.observe(viewLifecycleOwner) { isLoading ->
+            binding.progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
+        }
+    }
+
+    private fun observeError() {
+        mealDetailsViewModel.error.observe(viewLifecycleOwner) { errorMessage ->
+            errorMessage?.let {
+                Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
+                Log.e("MealDetailsFragment", "Error: $it")
             }
-        })
+        }
+    }
+
+    private fun observeIsFavorite() {
+        mealDetailsViewModel.isFavorite.observe(viewLifecycleOwner) { isFavorite ->
+            val favoriteIcon: ImageView? = binding.favoriteIconImageView
+            favoriteIcon?.setImageResource(if (isFavorite) R.drawable.ic_heart_filled else R.drawable.ic_heart_outline)
+        }
+    }
+
+
+    private fun setupFavoriteIcon() {
+        val favoriteIcon: ImageView? = binding.favoriteIconImageView
+        favoriteIcon?.setOnClickListener {
+            mealDetailsViewModel.addMealToFavorites()
+        }
     }
 
     private fun updateUI(meal: Meal) {
@@ -136,18 +125,19 @@ class MealDetailsFragment : Fragment() {
         meal.getIngredientsAndMeasures().forEach { (ingredient, measure) ->
             val ingredientView = TextView(context).apply {
                 text = "${measure ?: ""} ${ingredient ?: ""}"
-                setTextColor(Color.parseColor("#5E705B")) // Set the custom color
-                textSize = 16f // Optional: tweak size for visual harmony
+                setTextColor(Color.parseColor("#5E705B"))
+                textSize = 16f
             }
             binding.ingredientsLayout.addView(ingredientView)
         }
 
-
-        if (!authManager.isGuestMode()) {
-            if (!meal.strYoutube.isNullOrEmpty()) { // Check for null or empty
+        //show youtube
+        if (!mealDetailsViewModel.authManager.isGuestMode()) {
+            if (!meal.strYoutube.isNullOrEmpty()) {
                 binding.youtubePlayerView.visibility = View.VISIBLE
                 lifecycle.addObserver(binding.youtubePlayerView)
-                binding.youtubePlayerView.addYouTubePlayerListener(object : AbstractYouTubePlayerListener() {
+                binding.youtubePlayerView.addYouTubePlayerListener(object :
+                    AbstractYouTubePlayerListener() {
                     override fun onReady(youTubePlayer: YouTubePlayer) {
                         val videoId = meal.strYoutube.substringAfterLast("v=")
                         if (videoId.isNotEmpty()) {
@@ -165,55 +155,15 @@ class MealDetailsFragment : Fragment() {
         }
     }
 
-    private fun addMealToFavorites(meal: Meal) { // Pass meal as a parameter
-        Log.d("Favorites", "addMealToFavorites called")
-        lifecycleScope.launch(Dispatchers.IO) {
-            try {
-                val currentUserId = userId // Get userId
-                if (currentUserId != null) {
-                    val favoriteMeal = FavoriteMeal(
-                        id = meal.idMeal,
-                        name = meal.strMeal,
-                        imageUrl = meal.strMealThumb,
-                        originCountry = null,
-                        ingredients = null,
-                        steps = null,
-                        videoUrl = null,
-                        guestMode = authManager.isGuestMode(),
-                        userId = currentUserId
-                    )
-                    appDatabase.favoriteMealDao().insert(favoriteMeal)
-                    withContext(Dispatchers.Main) {
-                        Toast.makeText(context, "Added to Favorites", Toast.LENGTH_SHORT).show()
-                    }
-                } else {
-                    Log.e("Favorites", "userId is null")
-                    withContext(Dispatchers.Main) {
-                        Toast.makeText(context, "User not logged in", Toast.LENGTH_SHORT).show()
-                    }
-                }
-            } catch (e: Exception) {
-                Log.e("Favorites", "Failed to add to Favorites: ${e.message}")
-                withContext(Dispatchers.Main) {
-                    Toast.makeText(context, "Failed to add to Favorites: ${e.message}", Toast.LENGTH_SHORT).show()
-                }
-            }
-        }
-    }
-
     private fun showPlanMealDialog() {
-        meal?.let {  // Use the class property meal
-            val planMealDialogFragment = PlanMealDialogFragment()
-            val bundle = Bundle().apply {
-                putString("mealName", it.strMeal)
-                putString("mealImageUrl", it.strMealThumb)
-                putString("mealId", it.idMeal)
-            }
-            planMealDialogFragment.arguments = bundle
-            planMealDialogFragment.show(childFragmentManager, "PlanMealDialog")
-        } ?: run {
-            Toast.makeText(context, "Meal data not available", Toast.LENGTH_SHORT).show()
+        val planMealDialogFragment = PlanMealDialogFragment()
+        val bundle = Bundle().apply {
+            putString("mealName",  mealDetailsViewModel.meal.value?.strMeal)
+            putString("mealImageUrl", mealDetailsViewModel.meal.value?.strMealThumb)
+            putString("mealId", mealDetailsViewModel.meal.value?.idMeal)
         }
+        planMealDialogFragment.arguments = bundle
+        planMealDialogFragment.show(childFragmentManager, "PlanMealDialog")
     }
 
     override fun onDestroyView() {

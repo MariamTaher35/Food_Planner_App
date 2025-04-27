@@ -56,7 +56,7 @@ data class Meal(
     val strImageSource: String?,
     val strCreativeCommonsConfirmed: String?,
     val dateModified: String?,
-    var isFavorite: Boolean = false // ADD THIS LINE
+    var isFavorite: Boolean = false
 ) {
     fun getIngredientsAndMeasures(): List<Pair<String?, String?>> {
         return listOf(

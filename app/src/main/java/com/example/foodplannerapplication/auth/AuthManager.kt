@@ -2,6 +2,7 @@ package com.example.foodplannerapplication.auth
 
 import android.content.Context
 import android.content.SharedPreferences
+import com.google.firebase.auth.FirebaseAuth
 
 class AuthManager(private val context: Context) {
 
@@ -32,4 +33,5 @@ class AuthManager(private val context: Context) {
     fun clear() {
         sharedPreferences.edit().clear().apply()
     }
+
 }

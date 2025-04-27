@@ -5,38 +5,48 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
+import android.widget.ProgressBar
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.foodplannerapplication.Adapters.AreaAdapter
-import com.example.foodplannerapplication.Models.Area
-import com.example.foodplannerapplication.Models.AreaResponse
-import com.example.foodplannerapplication.Models.TheMealDBService
 import com.example.foodplannerapplication.R
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
+import com.example.foodplannerapplication.ViewModels.CountriesViewModel
+import com.example.foodplannerapplication.databinding.FragmentCountriesBinding // Import the binding
 
 class CountriesFragment : Fragment() {
 
-    private val apiService = TheMealDBService.create()
-    private var countriesList: List<Area> = emptyList()
+    private var _binding: FragmentCountriesBinding? = null
+    private val binding get() = _binding!!
+
     private lateinit var countriesRecyclerView: RecyclerView
     private lateinit var areaAdapter: AreaAdapter
+    private lateinit var viewModel: CountriesViewModel
+    private lateinit var errorTextView: TextView
+    private lateinit var progressBar: ProgressBar
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.fragment_countries, container, false)
+        _binding = FragmentCountriesBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        countriesRecyclerView = view.findViewById(R.id.countriesRecyclerView)
+
+        // Initialize views using view binding
+        countriesRecyclerView = binding.countriesRecyclerView
+        errorTextView = binding.errorTextView // Access from binding
+        progressBar = binding.progressBar    // Access from binding
+
         setupRecyclerView()
-        fetchCountries()
+        initializeViewModel()
+        observeViewModel()
     }
 
     private fun setupRecyclerView() {
@@ -64,23 +74,29 @@ class CountriesFragment : Fragment() {
         countriesRecyclerView.adapter = areaAdapter
     }
 
-    private fun fetchCountries() {
-        apiService.getAreas().enqueue(object : Callback<AreaResponse> {
-            override fun onResponse(call: Call<AreaResponse>, response: Response<AreaResponse>) {
-                if (response.isSuccessful) {
-                    val areaResponse = response.body()
-                    areaResponse?.meals?.let {
-                        countriesList = it
-                        areaAdapter.updateData(countriesList)
-                    }
-                } else {
-                    Log.e("CountriesFragment", "Failed to fetch countries: ${response.message()}")
-                }
-            }
+    private fun initializeViewModel() {
+        viewModel = ViewModelProvider(this).get(CountriesViewModel::class.java)
+    }
 
-            override fun onFailure(call: Call<AreaResponse>, t: Throwable) {
-                Log.e("CountriesFragment", "Error fetching countries: ${t.message}")
-            }
-        })
+    private fun observeViewModel() {
+        viewModel.countries.observe(viewLifecycleOwner) { countries ->
+            areaAdapter.updateData(countries)
+        }
+
+        viewModel.loading.observe(viewLifecycleOwner) { isLoading ->
+            progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
+        }
+
+        viewModel.error.observe(viewLifecycleOwner) { error ->
+            errorTextView.text = error
+            errorTextView.visibility = if (error.isNotEmpty()) View.VISIBLE else View.GONE
+            Log.e("CountriesFragment", error)
+        }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 }
+

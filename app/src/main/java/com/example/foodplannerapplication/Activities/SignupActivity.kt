@@ -32,8 +32,8 @@ class SignupActivity : AppCompatActivity() {
     }
 
     private fun signUpWithEmailAndPassword() {
-        val name = binding.nameEditText.text.toString()
-        val email = binding.emailEditText.text.toString()
+        val name = binding.nameEditText.text.toString().trim()
+        val email = binding.emailEditText.text.toString().trim()
         val password = binding.passwordEditText.text.toString()
         val confirmPassword = binding.confirmPasswordEditText.text.toString()
 
@@ -46,7 +46,8 @@ class SignupActivity : AppCompatActivity() {
                             updateUserProfile(name)
                         } else {
                             Timber.w("createUserWithEmail:failure", task.exception)
-                            Toast.makeText(baseContext, "Signup failed.", Toast.LENGTH_SHORT).show()
+                            val errorMessage = task.exception?.localizedMessage ?: "Signup failed."
+                            Toast.makeText(this, errorMessage, Toast.LENGTH_LONG).show()
                         }
                     }
             } else {
@@ -67,8 +68,27 @@ class SignupActivity : AppCompatActivity() {
             ?.addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     Timber.d("User profile updated.")
-                    Toast.makeText(baseContext, "Signup successful.", Toast.LENGTH_SHORT).show()
+                    sendEmailVerification()
+                } else {
+                    Toast.makeText(this, "Failed to update profile.", Toast.LENGTH_SHORT).show()
+                }
+            }
+    }
+
+    private fun sendEmailVerification() {
+        val user = auth.currentUser
+        user?.sendEmailVerification()
+            ?.addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    Toast.makeText(
+                        this,
+                        "Signup successful! Verification email sent. Please verify before logging in.",
+                        Toast.LENGTH_LONG
+                    ).show()
                     finish()
+                } else {
+                    Toast.makeText(this, "Failed to send verification email.", Toast.LENGTH_SHORT).show()
+                    Timber.w("sendEmailVerification:failure", task.exception)
                 }
             }
     }

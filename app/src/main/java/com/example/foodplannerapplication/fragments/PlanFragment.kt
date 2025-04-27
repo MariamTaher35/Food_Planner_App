@@ -14,6 +14,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -21,28 +22,27 @@ import com.example.foodplannerapplication.Adapters.PlannedMealsAdapter
 import com.example.foodplannerapplication.Data.AppDatabase
 import com.example.foodplannerapplication.Data.PlannedMeal
 import com.example.foodplannerapplication.R
+import com.example.foodplannerapplication.ViewModels.PlanViewModel
 import com.example.foodplannerapplication.auth.AuthManager
 import com.example.foodplannerapplication.databinding.FragmentPlanBinding
 import com.example.foodplannerapplication.utils.CalendarManager
-import com.google.firebase.auth.FirebaseAuth
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
+import com.example.foodplannerapplication.utils.NetworkUtils
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 class PlanFragment : Fragment() {
 
     private var _binding: FragmentPlanBinding? = null
     private val binding get() = _binding!!
-    private lateinit var appDatabase: AppDatabase
+
     private lateinit var plannedMealsAdapter: PlannedMealsAdapter
     private lateinit var authManager: AuthManager
     private lateinit var guestMessageTextView: TextView
     private lateinit var calendarManager: CalendarManager
+
     private var mostRecentMealToAdd: PlannedMeal? = null
-    private val userId: String?
-        get() = FirebaseAuth.getInstance().currentUser?.uid
+
+    private val viewModel: PlanViewModel by viewModels()
 
     private val calendarPermissionResult =
         registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
@@ -52,8 +52,7 @@ class PlanFragment : Fragment() {
             Log.d("CalendarPermission", "Write Granted: $writeGranted, Read Granted: $readGranted")
 
             if (writeGranted && readGranted) {
-                mostRecentMealToAdd?.let { calendarManager.addMealToCalendar(it) }
-                mostRecentMealToAdd = null
+                viewModel.onCalendarPermissionResult(true)
             } else {
                 Toast.makeText(
                     requireContext(),
@@ -65,14 +64,13 @@ class PlanFragment : Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         _binding = FragmentPlanBinding.inflate(inflater, container, false)
-        appDatabase = AppDatabase.getInstance(requireContext())
         authManager = AuthManager(requireContext())
         calendarManager = CalendarManager(requireContext())
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
+        super.onViewCreated(view,savedInstanceState)
 
         guestMessageTextView = view.findViewById(R.id.guest_mode_message)
 
@@ -85,6 +83,25 @@ class PlanFragment : Fragment() {
 
             setupRecyclerView()
             observePlannedMeals()
+        }
+    }
+
+    private fun setupRecyclerView() {
+        plannedMealsAdapter = PlannedMealsAdapter { meal ->
+            deletePlannedMeal(meal)
+        }
+        plannedMealsAdapter.onMealClick = { meal ->
+            navigateToMealDetails(meal.id)
+        }
+        binding.plannedMealsRecyclerView.layoutManager = LinearLayoutManager(requireContext())
+        binding.plannedMealsRecyclerView.adapter = plannedMealsAdapter
+    }
+
+    private fun observePlannedMeals() {
+        lifecycleScope.launch {
+            viewModel.plannedMealsFlow.collectLatest { meals ->
+                plannedMealsAdapter.submitList(meals)
+            }
         }
     }
 
@@ -112,51 +129,16 @@ class PlanFragment : Fragment() {
         }
     }
 
-    private fun setupRecyclerView() {
-        plannedMealsAdapter = PlannedMealsAdapter { meal ->
-            deletePlannedMeal(meal)
-        }
-        plannedMealsAdapter.onMealClick = { meal ->  // Set the click listener here
-            navigateToMealDetails(meal.id) // Access mealId here
-        }
-        binding.plannedMealsRecyclerView.layoutManager = LinearLayoutManager(requireContext())
-        binding.plannedMealsRecyclerView.adapter = plannedMealsAdapter
-    }
-
-    private fun observePlannedMeals() {
-        userId?.let { currentUserId ->
-            lifecycleScope.launch {
-                appDatabase.plannedMealDao().getAll(currentUserId).collectLatest { meals ->
-                    withContext(Dispatchers.Main) {
-                        plannedMealsAdapter.submitList(meals)
-                        meals.forEach { meal ->
-                            mostRecentMealToAdd = meal
-                            checkCalendarPermissionAndAdd(meal)
-                        }
-                    }
-                }
-            }
-        }
-    }
-
     private fun navigateToMealDetails(mealId: String) {
         val bundle = Bundle().apply {
             putString("mealId", mealId)
+            putBoolean("isFromPlan", true) // Pass the flag to MealDetailsFragment
         }
         findNavController().navigate(R.id.mealDetailsFragment, bundle)
     }
 
     private fun deletePlannedMeal(plannedMeal: PlannedMeal) {
-        userId?.let { currentUserId ->
-            lifecycleScope.launch(Dispatchers.IO) {
-                if (plannedMeal.userId == currentUserId) {
-                    appDatabase.plannedMealDao().delete(plannedMeal)
-                    withContext(Dispatchers.Main) {
-                        Toast.makeText(context, "Meal deleted from plan", Toast.LENGTH_SHORT).show()
-                    }
-                }
-            }
-        }
+        viewModel.deletePlannedMeal(plannedMeal)
     }
 
     private fun showSearchDialog() {
@@ -178,13 +160,11 @@ class PlanFragment : Fragment() {
 
     private fun performSearchAndAddMeal(searchTerm: String) {
         lifecycleScope.launch {
-            delay(1000)
+            // Simulate a search operation
             val dummyMealId = "searchedMealId_${System.currentTimeMillis()}"
             val dummyMealName = "Searched Meal: $searchTerm"
             val dummyMealImageUrl = "https://example.com/searched_meal.jpg"
-            withContext(Dispatchers.Main) {
-                showDayAndTimePickerDialog(dummyMealId, dummyMealName, dummyMealImageUrl)
-            }
+            showDayAndTimePickerDialog(dummyMealId, dummyMealName, dummyMealImageUrl)
         }
     }
 
@@ -207,7 +187,6 @@ class PlanFragment : Fragment() {
                         selectedHour = hourOfDay
                         selectedMinute = minute
                         val mealTime = String.format("%02d:%02d", selectedHour, selectedMinute)
-                        Log.d("PlanFragment", "Selected Time: $mealTime")
                         addMealToPlan(mealId, selectedDay, mealTime, mealName, mealImageUrl)
                     },
                     selectedHour,
@@ -222,21 +201,7 @@ class PlanFragment : Fragment() {
     }
 
     private fun addMealToPlan(mealId: String, dayOfWeek: String, mealTime: String, mealName: String, mealImageUrl: String) {
-        userId?.let { currentUserId ->
-            val plannedMeal = PlannedMeal(mealId, dayOfWeek, mealTime, authManager.isGuestMode(), mealName, mealImageUrl, currentUserId)
-            Log.d("PlanFragment", "Creating PlannedMeal with userId: $currentUserId")
-
-            lifecycleScope.launch(Dispatchers.IO) {
-                appDatabase.plannedMealDao().insert(plannedMeal)
-                withContext(Dispatchers.Main) {
-                    Toast.makeText(context, "$mealName added to plan for $dayOfWeek at $mealTime", Toast.LENGTH_SHORT).show()
-                    mostRecentMealToAdd = plannedMeal
-                    checkCalendarPermissionAndAdd(plannedMeal)
-                }
-            }
-        } ?: run {
-            Toast.makeText(context, "User not logged in.", Toast.LENGTH_SHORT).show()
-        }
+        viewModel.addMealToPlan(mealId, dayOfWeek, mealTime, mealName, mealImageUrl)
     }
 
     override fun onDestroyView() {

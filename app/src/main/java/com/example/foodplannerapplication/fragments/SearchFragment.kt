@@ -6,23 +6,21 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.navigation.findNavController
 import com.example.foodplannerapplication.Adapters.MealAdapter
 import com.example.foodplannerapplication.Models.Meal
-import com.example.foodplannerapplication.Models.MealsResponse
-import com.example.foodplannerapplication.Models.TheMealDBService
 import com.example.foodplannerapplication.R
 import com.example.foodplannerapplication.databinding.FragmentSearchBinding
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
+import com.example.foodplannerapplication.viewmodels.SearchViewModel
 
 class SearchFragment : Fragment() {
 
     private var _binding: FragmentSearchBinding? = null
     private val binding get() = _binding!!
-    private val apiService = TheMealDBService.create()
+    private val viewModel: SearchViewModel by viewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -38,35 +36,24 @@ class SearchFragment : Fragment() {
         binding.searchButton.setOnClickListener {
             val searchTerm = binding.searchEditText.text.toString().trim()
             if (searchTerm.isNotEmpty()) {
-                performSearch(searchTerm)
+                viewModel.searchMeals(searchTerm)
             }
         }
-    }
 
-    private fun performSearch(searchTerm: String) {
-        val call = apiService.searchMeals(searchTerm)
-        call.enqueue(object : Callback<MealsResponse> {
-            override fun onResponse(
-                call: Call<MealsResponse>,
-                response: Response<MealsResponse>
-            ) {
-                if (response.isSuccessful) {
-                    val meals = response.body()?.meals ?: emptyList()
-                    setupRecyclerView(meals)
-                } else {
-                    Log.e("SearchFragment", "API request failed: ${response.message()}")
-                }
-            }
+        // Observe the meals LiveData
+        viewModel.mealsLiveData.observe(viewLifecycleOwner, Observer { meals ->
+            setupRecyclerView(meals)
+        })
 
-            override fun onFailure(call: Call<MealsResponse>, t: Throwable) {
-                Log.e("SearchFragment", "API request failed: ${t.message}")
-            }
+        // Observe the error message LiveData
+        viewModel.errorMessage.observe(viewLifecycleOwner, Observer { error ->
+            Log.e("SearchFragment", error)
         })
     }
 
     private fun setupRecyclerView(meals: List<Meal>) {
         binding.searchResultsRecyclerView.layoutManager = LinearLayoutManager(context)
-        binding.searchResultsRecyclerView.adapter = MealAdapter(meals, true) { meal -> // Passing true here
+        binding.searchResultsRecyclerView.adapter = MealAdapter(meals, true) { meal ->
             // Handle meal click here (e.g., navigate to meal details)
             Log.d("SearchFragment", "Meal clicked: ${meal.strMeal}")
             val bundle = Bundle().apply {

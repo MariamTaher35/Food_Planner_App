@@ -155,7 +155,9 @@
                 android:textColor="@color/button_text_color"
                 app:backgroundTint="#788c74"
                 app:cornerRadius="12dp"
-                android:textSize="18sp" />
+                android:textSize="18sp"
+                android:visibility="visible" />  <!-- Default visibility is visible -->
+
 
             <ProgressBar
                 android:id="@+id/progressBar"

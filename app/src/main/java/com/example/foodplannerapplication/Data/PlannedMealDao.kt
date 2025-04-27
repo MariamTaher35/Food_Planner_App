@@ -22,4 +22,7 @@ interface PlannedMealDao {
 
     @Query("SELECT * FROM planned_meals WHERE dayOfWeek = :dayOfWeek AND mealTime = :mealTime AND userId = :userId")
     suspend fun getMealsByDayAndTime(dayOfWeek: String, mealTime: String, userId: String): List<PlannedMeal>
+
+    @Query("SELECT * FROM planned_meals WHERE userId = :userId")  //Added for offline
+    fun getAllOnce(userId: String): List<PlannedMeal>
 }
