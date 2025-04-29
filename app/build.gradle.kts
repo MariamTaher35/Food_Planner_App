@@ -111,7 +111,8 @@ dependencies {
     implementation("androidx.navigation:navigation-ui-ktx:2.7.5")
 
     implementation ("de.hdodenhof:circleimageview:3.1.0")
-    implementation ("com.pierfrancescosoffritti.androidyoutubeplayer:core:12.1.0' // Or the latest version")
+    implementation("com.pierfrancescosoffritti.androidyoutubeplayer:core:12.1.0") // Or the latest version
+
 
     implementation ("com.google.android.material:material:1.10.0")
 

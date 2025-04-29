@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -14,11 +15,11 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.foodplannerapplication.Adapters.FavoritesAdapter
 import com.example.foodplannerapplication.Data.AppDatabase
+import com.example.foodplannerapplication.Data.FavoriteMeal
 import com.example.foodplannerapplication.R
 import com.example.foodplannerapplication.ViewModels.FavoritesViewModel
 import com.example.foodplannerapplication.auth.AuthManager
 import com.google.firebase.auth.FirebaseAuth
-
 
 class FavoritesFragment : Fragment() {
 
@@ -28,6 +29,7 @@ class FavoritesFragment : Fragment() {
     private lateinit var authManager: AuthManager
     private lateinit var guestMessageTextView: TextView
     private lateinit var viewModel: FavoritesViewModel
+
     private val userId: String?
         get() = FirebaseAuth.getInstance().currentUser?.uid
 
@@ -44,9 +46,8 @@ class FavoritesFragment : Fragment() {
         recyclerView.layoutManager = LinearLayoutManager(context)
         appDatabase = AppDatabase.getInstance(requireContext())
 
-        // Initialize ViewModel
         val viewModelFactory = FavoritesViewModelFactory(appDatabase, userId)
-        viewModel = ViewModelProvider(this, viewModelFactory).get(FavoritesViewModel::class.java)
+        viewModel = ViewModelProvider(this, viewModelFactory)[FavoritesViewModel::class.java]
 
         if (authManager.isGuestMode()) {
             recyclerView.visibility = View.GONE
@@ -54,35 +55,26 @@ class FavoritesFragment : Fragment() {
         } else {
             recyclerView.visibility = View.VISIBLE
             guestMessageTextView.visibility = View.GONE
-            setupObservers() //set up observer
+            setupObservers()
         }
     }
 
     private fun setupObservers() {
-        // Observe the list of favorite meals from the ViewModel
         viewModel.favoriteMeals.observe(viewLifecycleOwner) { favoriteMeals ->
-            adapter = FavoritesAdapter(favoriteMeals, { meal ->
+            adapter = FavoritesAdapter(favoriteMeals.toMutableList(), { meal ->
                 navigateToMealDetails(meal.id)
             }, { meal ->
-                viewModel.deleteFavoriteMeal(meal)
+                showDeleteConfirmationDialog(meal)
             })
             recyclerView.adapter = adapter
         }
 
-        // Observe for any messages from the ViewModel
         viewModel.message.observe(viewLifecycleOwner) { message ->
             Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
         }
 
-        viewModel.loading.observe(viewLifecycleOwner){loading ->
-            //TODO show progress bar
-        }
-    }
-
-    override fun onResume() {
-        super.onResume()
-        if (!authManager.isGuestMode()) {
-            viewModel.loadFavorites()
+        viewModel.loading.observe(viewLifecycleOwner) { loading ->
+            // Optional: Add progress indicator handling
         }
     }
 
@@ -92,9 +84,26 @@ class FavoritesFragment : Fragment() {
         }
         findNavController().navigate(R.id.mealDetailsFragment, bundle)
     }
+
+    private fun showDeleteConfirmationDialog(meal: FavoriteMeal) {
+        AlertDialog.Builder(requireContext())
+            .setTitle("Delete Favorite")
+            .setMessage("Are you sure you want to delete \"${meal.name}\" from your favorites?")
+            .setPositiveButton("Yes") { _, _ ->
+                viewModel.deleteFavoriteMeal(meal)
+            }
+            .setNegativeButton("No") { dialog, _ ->
+                dialog.dismiss()
+            }
+            .create()
+            .show()
+    }
 }
 
-class FavoritesViewModelFactory(private val appDatabase: AppDatabase, private val userId: String?) : ViewModelProvider.Factory {
+class FavoritesViewModelFactory(
+    private val appDatabase: AppDatabase,
+    private val userId: String?
+) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(FavoritesViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")

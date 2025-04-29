@@ -5,9 +5,9 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.navigation.findNavController
 import com.example.foodplannerapplication.Adapters.MealAdapter
@@ -36,31 +36,28 @@ class SearchFragment : Fragment() {
         binding.searchButton.setOnClickListener {
             val searchTerm = binding.searchEditText.text.toString().trim()
             if (searchTerm.isNotEmpty()) {
-                viewModel.searchMeals(searchTerm)
+                viewModel.searchByName(searchTerm)
+                viewModel.searchByCategory(searchTerm)
+                viewModel.searchByArea(searchTerm)
             }
         }
 
-        // Observe the meals LiveData
-        viewModel.mealsLiveData.observe(viewLifecycleOwner, Observer { meals ->
-            setupRecyclerView(meals)
-        })
+        viewModel.mealsLiveData.observe(viewLifecycleOwner) { meals ->
+            if (meals.isNotEmpty()) setupRecyclerView(meals)
+        }
 
-        // Observe the error message LiveData
-        viewModel.errorMessage.observe(viewLifecycleOwner, Observer { error ->
+        viewModel.errorMessage.observe(viewLifecycleOwner) { error ->
+            Toast.makeText(context, error, Toast.LENGTH_SHORT).show()
             Log.e("SearchFragment", error)
-        })
+        }
     }
 
     private fun setupRecyclerView(meals: List<Meal>) {
         binding.searchResultsRecyclerView.layoutManager = LinearLayoutManager(context)
         binding.searchResultsRecyclerView.adapter = MealAdapter(meals, true) { meal ->
-            // Handle meal click here (e.g., navigate to meal details)
-            Log.d("SearchFragment", "Meal clicked: ${meal.strMeal}")
-            val bundle = Bundle().apply {
-                putString("mealId", meal.idMeal)
-            }
+            val bundle = Bundle().apply { putString("mealId", meal.idMeal) }
             view?.findNavController()?.navigate(
-                R.id.action_searchFragment_to_mealDetailsFragment,  // Use the correct action ID from your nav_graph!
+                R.id.action_searchFragment_to_mealDetailsFragment,
                 bundle
             )
         }

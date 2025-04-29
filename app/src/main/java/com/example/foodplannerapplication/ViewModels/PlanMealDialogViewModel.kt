@@ -1,4 +1,4 @@
-package com.example.foodplannerapplication.viewmodels
+package com.example.foodplannerapplication.ViewModels
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
@@ -16,8 +16,16 @@ class PlanMealDialogViewModel(application: Application) : AndroidViewModel(appli
     private val appDatabase = AppDatabase.getInstance(application)
     private val authManager = AuthManager(application)
 
-    fun addMealToPlan(mealId: String, dayOfWeek: String, mealTime: String, mealName: String, mealImageUrl: String, onSuccess: () -> Unit, onError: (String) -> Unit) {
-        val userId = FirebaseAuth.getInstance().currentUser ?.uid
+    fun addMealToPlan(
+        mealId: String,
+        dayOfWeek: String,
+        mealTime: String,
+        mealName: String,
+        mealImageUrl: String,
+        onSuccess: () -> Unit,
+        onError: (String) -> Unit
+    ) {
+        val userId = FirebaseAuth.getInstance().currentUser?.uid
 
         if (userId != null) {
             val plannedMeal = PlannedMeal(
@@ -43,7 +51,7 @@ class PlanMealDialogViewModel(application: Application) : AndroidViewModel(appli
                 }
             }
         } else {
-            onError("User  not logged in")
+            onError("User not logged in")
         }
     }
 }

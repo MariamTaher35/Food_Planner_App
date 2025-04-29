@@ -138,8 +138,17 @@ class PlanFragment : Fragment() {
     }
 
     private fun deletePlannedMeal(plannedMeal: PlannedMeal) {
-        viewModel.deletePlannedMeal(plannedMeal)
+        AlertDialog.Builder(requireContext())
+            .setTitle("Delete Planned Meal")
+            .setMessage("Are you sure you want to remove \"${plannedMeal.mealName}\" from your plan?")
+            .setPositiveButton("Yes") { _, _ ->
+                viewModel.deletePlannedMeal(plannedMeal)
+            }
+            .setNegativeButton("No", null)
+            .create()
+            .show()
     }
+
 
     private fun showSearchDialog() {
         val searchEditText = EditText(requireContext())

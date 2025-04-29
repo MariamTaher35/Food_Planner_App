@@ -27,6 +27,8 @@
     <color name="primary_color">#788c74</color>
     <color name="backgrondbottom_color">#52C1E1C1</color>
     <color name="selected_color">#F5DEB3</color>
+    <color name="time_picker_background">#FFFFFF</color> <!-- Set to your desired background color -->
+    <color name="time_picker_text_color">#FFFFFF</color>
 
     <!-- Updated to green tone -->
 

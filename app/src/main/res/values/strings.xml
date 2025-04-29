@@ -31,9 +31,7 @@
     <string name="meal_image">Image of the meal</string>
     <string name="search_icon">Search Icon</string>
     <string name="country_image">Country Image</string>
-
-
-
+    <string name="meal_added_to_plan">Meal Added To Plan\n</string>
 
 
 </resources>
